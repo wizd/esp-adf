@@ -132,6 +132,8 @@ typedef struct {
     int            agc_target_level_dbfs;     /*!< AGC target level(dBFS) */
     bool           enable_se;                 /*!< Speech Enhancement, microphone array processing enable*/
     int            multi_in_rb_num;           /*!< The number of input ringbuffer */
+    void         (*vad_callback)(vad_state_t state, void *user_data); /*!< Callback invoked when VAD state changes */
+    void          *vad_callback_user_data;     /*!< User data passed to VAD callback */
 } algorithm_stream_cfg_t;
 
 #define ALGORITHM_STREAM_DEFAULT_MASK    (ALGORITHM_STREAM_USE_AEC | ALGORITHM_STREAM_USE_NS)
@@ -152,8 +154,10 @@ typedef struct {
     .agc_mode = AFE_AGC_MODE_WAKENET,                                                             \
     .input_format = AUDIO_ADC_INPUT_CH_FORMAT,                                                    \
     .agc_target_level_dbfs = -3,                                                                  \
-    .enable_se = true,                                                                             \
+    .enable_se = true,                                                                            \
     .multi_in_rb_num = false,                                                                     \
+    .vad_callback = NULL,                                                                         \
+    .vad_callback_user_data = NULL,                                                               \
 }
 
 /**

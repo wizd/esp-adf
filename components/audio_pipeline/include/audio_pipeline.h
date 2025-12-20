@@ -292,6 +292,19 @@ esp_err_t audio_pipeline_set_listener(audio_pipeline_handle_t pipeline, audio_ev
 audio_event_iface_handle_t audio_pipeline_get_event_iface(audio_pipeline_handle_t pipeline);
 
 /**
+ * @brief      Helper to parse VAD state from an event message
+ *
+ * @param[in]  msg        The audio event message
+ * @param[out] vad_state  Output VAD state value
+ *
+ * @return
+ *     - ESP_OK if the message contains VAD information
+ *     - ESP_ERR_INVALID_ARG on bad parameters
+ *     - ESP_FAIL if the message is not a VAD state report
+ */
+esp_err_t audio_pipeline_msg_get_vad_state(audio_event_iface_msg_t *msg, int *vad_state);
+
+/**
  * @brief      Insert the specific audio_element to audio_pipeline, previous element connect to the next element by ring buffer.
  *
  * @param[in]  pipeline     The audio pipeline handle

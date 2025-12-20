@@ -73,6 +73,7 @@ typedef enum {
     AEL_MSG_CMD_REPORT_MUSIC_INFO   = 9,
     AEL_MSG_CMD_REPORT_CODEC_FMT    = 10,
     AEL_MSG_CMD_REPORT_POSITION     = 11,
+    AEL_MSG_CMD_REPORT_VAD_STATE    = 12,
 } audio_element_msg_cmd_t;
 
 /**
@@ -547,6 +548,18 @@ esp_err_t audio_element_wait_for_buffer(audio_element_handle_t el, int size_expe
  *     - ESP_FAIL
  */
 esp_err_t audio_element_report_status(audio_element_handle_t el, audio_element_status_t status);
+
+/**
+ * @brief      Element will sendout event (VAD state) to event by this function.
+ *
+ * @param[in]  el         The audio element handle
+ * @param[in]  vad_state  The VAD state value to report
+ *
+ * @return
+ *     - ESP_OK
+ *     - ESP_FAIL
+ */
+esp_err_t audio_element_report_vad_state(audio_element_handle_t el, int vad_state);
 
 /**
  * @brief      Element will sendout event (information) to event by this function.

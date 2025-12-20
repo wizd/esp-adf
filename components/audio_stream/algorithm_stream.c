@@ -67,6 +67,10 @@ typedef struct {
     afe_agc_mode_t                agc_mode;
     int                           agc_compression_gain_db;
     int                           agc_target_level_dbfs;
+    void                        (*vad_callback)(vad_state_t state, void *user_data);
+    void                         *vad_callback_user_data;
+    vad_state_t                    last_vad_state;
+    bool                           vad_state_initialized;
 } algo_stream_t;
 
 esp_err_t algorithm_mono_fix(uint8_t *sbuff, uint32_t len)
@@ -120,6 +124,14 @@ void _algo_fetch_task(void *pv)
         afe_fetch_result_t* res = algo->afe_handle->fetch(algo->afe_data);
         if (res && res->ret_value != ESP_FAIL) {
             audio_element_output(self, (char *)res->data, res->data_size);
+            if ((!algo->vad_state_initialized) || (res->vad_state != algo->last_vad_state)) {
+                algo->last_vad_state = res->vad_state;
+                algo->vad_state_initialized = true;
+                audio_element_report_vad_state(self, (int)algo->last_vad_state);
+                if (algo->vad_callback) {
+                    algo->vad_callback(algo->last_vad_state, algo->vad_callback_user_data);
+                }
+            }
             switch (res->vad_state) {
                 case VAD_SILENCE:
                     ESP_LOGD(TAG, "VAD state : SILENCE");
@@ -139,6 +151,8 @@ static esp_err_t _algo_open(audio_element_handle_t self)
 {
     algo_stream_t *algo = (algo_stream_t *)audio_element_getdata(self);
     AUDIO_NULL_CHECK(TAG, algo, return ESP_FAIL);
+    algo->vad_state_initialized = false;
+    algo->last_vad_state = VAD_SILENCE;
     char *model_name = NULL;
 
     afe_config_t *afe_config = afe_config_init(algo->input_format, algo->models, AFE_TYPE_VC, AFE_MODE_LOW_COST);
@@ -327,6 +341,10 @@ audio_element_handle_t algo_stream_init(algorithm_stream_cfg_t *config)
     algo->agc_mode = config->agc_mode;
     algo->agc_compression_gain_db = config->agc_compression_gain_db;
     algo->agc_target_level_dbfs = config->agc_target_level_dbfs;
+    algo->vad_callback = config->vad_callback;
+    algo->vad_callback_user_data = config->vad_callback_user_data;
+    algo->last_vad_state = VAD_SILENCE;
+    algo->vad_state_initialized = false;
     algo->state = xEventGroupCreate();
     AUDIO_NULL_CHECK(TAG, algo->state, goto _exit);
 

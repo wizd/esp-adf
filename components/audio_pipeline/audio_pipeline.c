@@ -23,6 +23,7 @@
  */
 
 #include <string.h>
+#include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
@@ -240,6 +241,23 @@ esp_err_t audio_pipeline_remove_listener(audio_pipeline_handle_t pipeline)
         }
     }
     pipeline->listener = NULL;
+    return ESP_OK;
+}
+
+audio_event_iface_handle_t audio_pipeline_get_event_iface(audio_pipeline_handle_t pipeline)
+{
+    AUDIO_NULL_CHECK(TAG, pipeline, return NULL);
+    return pipeline->listener;
+}
+
+esp_err_t audio_pipeline_msg_get_vad_state(audio_event_iface_msg_t *msg, int *vad_state)
+{
+    AUDIO_NULL_CHECK(TAG, msg, return ESP_ERR_INVALID_ARG);
+    AUDIO_NULL_CHECK(TAG, vad_state, return ESP_ERR_INVALID_ARG);
+    if (msg->cmd != AEL_MSG_CMD_REPORT_VAD_STATE) {
+        return ESP_FAIL;
+    }
+    *vad_state = (int)(intptr_t)msg->data;
     return ESP_OK;
 }
 

@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -661,6 +662,19 @@ esp_err_t audio_element_report_status(audio_element_handle_t el, audio_element_s
         msg.data = (void *)status;
         msg.data_len = sizeof(status);
         ESP_LOGD(TAG, "REPORT_STATUS,[%s]evt out cmd = %d,status:%d", el->tag, msg.cmd, status);
+        return audio_element_msg_sendout(el, &msg);
+    }
+    return ESP_FAIL;
+}
+
+esp_err_t audio_element_report_vad_state(audio_element_handle_t el, int vad_state)
+{
+    if (el) {
+        audio_event_iface_msg_t msg = { 0 };
+        msg.cmd = AEL_MSG_CMD_REPORT_VAD_STATE;
+        msg.data = (void *)(intptr_t)vad_state;
+        msg.data_len = sizeof(vad_state);
+        ESP_LOGD(TAG, "REPORT_VAD,[%s]evt out cmd:%d,state:%d", el->tag, msg.cmd, vad_state);
         return audio_element_msg_sendout(el, &msg);
     }
     return ESP_FAIL;
