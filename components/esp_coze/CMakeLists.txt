@@ -4,5 +4,5 @@ idf_component_register(INCLUDE_DIRS "${public_include_dirs}"
                        PRIV_REQUIRES esp_http_client
                        WHOLE_ARCHIVE)
 add_prebuilt_library(esp_coze "${CMAKE_CURRENT_LIST_DIR}/libs/${CONFIG_IDF_TARGET}/libcoze_websocket.a"
-                     PRIV_REQUIRES mbedtls espressif__esp_websocket_client json)
+                     PRIV_REQUIRES mbedtls json)
 target_link_libraries(${COMPONENT_LIB} INTERFACE esp_coze)
