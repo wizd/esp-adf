@@ -124,21 +124,23 @@ void _algo_fetch_task(void *pv)
         afe_fetch_result_t* res = algo->afe_handle->fetch(algo->afe_data);
         if (res && res->ret_value != ESP_FAIL) {
             audio_element_output(self, (char *)res->data, res->data_size);
-            if ((!algo->vad_state_initialized) || (res->vad_state != algo->last_vad_state)) {
-                algo->last_vad_state = res->vad_state;
-                algo->vad_state_initialized = true;
-                audio_element_report_vad_state(self, (int)algo->last_vad_state);
-                if (algo->vad_callback) {
-                    algo->vad_callback(algo->last_vad_state, algo->vad_callback_user_data);
+            if (algo->algo_mask & ALGORITHM_STREAM_USE_VAD) {
+                if ((!algo->vad_state_initialized) || (res->vad_state != algo->last_vad_state)) {
+                    algo->last_vad_state = res->vad_state;
+                    algo->vad_state_initialized = true;
+                    audio_element_report_vad_state(self, (int)algo->last_vad_state);
+                    if (algo->vad_callback) {
+                        algo->vad_callback(algo->last_vad_state, algo->vad_callback_user_data);
+                    }
                 }
-            }
-            switch (res->vad_state) {
-                case VAD_SILENCE:
-                    ESP_LOGD(TAG, "VAD state : SILENCE");
-                    break;
-                case VAD_SPEECH:
-                    ESP_LOGD(TAG, "VAD state : SPEECH");
-                    break;
+                switch (res->vad_state) {
+                    case VAD_SILENCE:
+                        ESP_LOGD(TAG, "VAD state : SILENCE");
+                        break;
+                    case VAD_SPEECH:
+                        ESP_LOGD(TAG, "VAD state : SPEECH");
+                        break;
+                }
             }
         }
     }
