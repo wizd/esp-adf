@@ -155,7 +155,7 @@ static esp_err_t _algo_open(audio_element_handle_t self)
     algo->last_vad_state = VAD_SILENCE;
     char *model_name = NULL;
 
-    afe_config_t *afe_config = afe_config_init(algo->input_format, algo->models, AFE_TYPE_VC, AFE_MODE_LOW_COST);
+    afe_config_t *afe_config = afe_config_init(algo->input_format, algo->models, algo->afe_type, AFE_MODE_LOW_COST);
     afe_config->wakenet_init = false;
     afe_config->afe_perferred_core = 1;
     afe_config->afe_perferred_priority = 21;
